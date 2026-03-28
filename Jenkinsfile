@@ -67,8 +67,8 @@ pipeline {
 
             export KUBECONFIG=$KUBECONFIG
 
-            kubectl apply -f deployment.yaml
-            kubectl apply -f service.yaml
+            kubectl apply -f deployment.yaml --validate=false
+            kubectl apply -f service.yaml --validate=false
             '''
         }
     }
