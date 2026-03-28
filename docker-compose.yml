@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  app:
+    image: sujaygope9939/myapp:latest
+    ports:
+      - "8080:8080"
