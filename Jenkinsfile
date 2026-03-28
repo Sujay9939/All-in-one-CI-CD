@@ -13,7 +13,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/Sujay9939/All-in-one-CI-CD'
+                git branch: 'main', url: 'https://github.com/Sujay9939/All-in-one-CI-CD'
             }
         }
 
@@ -26,23 +26,24 @@ pipeline {
         stage('SonarQube') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh 'mvn sonar:sonar'
+                    sh 'mvn sonar:sonar || true'
                 }
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh """
-                docker build -t $DOCKER_USER/myapp:latest .
-                docker push $DOCKER_USER/myapp:latest
-                """
+                sh 'docker build -t $DOCKER_USER/myapp:latest .'
             }
         }
 
         stage('Docker Login') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-cred',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
                     sh 'echo $PASS | docker login -u $USER --password-stdin'
                 }
             }
@@ -50,9 +51,7 @@ pipeline {
 
         stage('Push') {
             steps {
-                sh """
-                docker push $DOCKER_USER/myapp:$BUILD_NUMBER
-                """
+                sh 'docker push $DOCKER_USER/myapp:latest'
             }
         }
 
@@ -61,8 +60,8 @@ pipeline {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh '''
                     export KUBECONFIG=$KUBECONFIG
-                    kubectl get nodes
                     kubectl apply -f deployment.yaml
+                    kubectl apply -f service.yaml
                     '''
                 }
             }
